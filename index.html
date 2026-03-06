@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>รายงานผลการปฏิบัติงาน</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Tiro+Devanagari+Sanskrit&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -609,19 +608,200 @@ body {
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-/* ─── PRINT ─── */
+/* ─── PRINT / PDF ─── */
 @media print {
-  body { background: #fff; }
-  .toolbar { display: none; }
-  .doc-wrap { margin: 0; padding: 0; max-width: 100%; }
-  .doc { box-shadow: none; border-radius: 0; }
-  .add-area { display: none; }
-  .task-x { display: none; }
-  .day-row:hover { background: transparent; }
-  .doc-header { padding: 32px 40px 24px; }
-  .days-section { padding: 0 40px; }
-  .doc-summary { padding: 20px 40px; }
+  @page {
+    size: A4 portrait;
+    margin: 15mm 14mm 15mm 14mm;
+  }
+
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+  body { background: #fff !important; margin: 0; padding: 0; font-size: 13px; }
+
+  .toolbar, .add-area, .task-x, .cal-overlay, .toast { display: none !important; }
+
+  .doc-wrap {
+    margin: 0 !important; padding: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .doc {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+  }
+
+  .doc-header {
+    padding: 24px 36px 20px !important;
+    border-bottom: 2px solid #1e1c18 !important;
+    background: #fff !important;
+  }
+
+  .doc-title { font-size: 9px !important; color: #a09a92 !important; }
+  .doc-heading { font-size: 22px !important; }
+
+  .doc-meta { margin-top: 14px !important; gap: 24px !important; }
+  .meta-label { font-size: 9px !important; }
+  .meta-input { font-size: 13px !important; border-bottom: 1px solid #e5dfd4 !important; }
+
+  .days-section { padding: 0 36px !important; }
+
+  .day-row {
+    border-bottom: 1px solid #e5dfd4 !important;
+    min-height: 70px !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    grid-template-columns: 130px 1fr !important;
+  }
+
+  .day-label {
+    padding: 14px 20px 14px 0 !important;
+    border-right: 1px solid #e5dfd4 !important;
+  }
+
+  .day-name { font-size: 14px !important; }
+  .day-date-sub { font-size: 11px !important; }
+  .day-indicator { width: 3px !important; height: 16px !important; }
+
+  .day-tasks { padding: 12px 0 12px 22px !important; }
+
+  .task-line { padding: 3px 0 !important; }
+  .task-bullet { width: 5px !important; height: 5px !important; }
+  .task-txt { font-size: 13px !important; }
+
+  .doc-summary {
+    padding: 16px 36px !important;
+    background: #f7f3ea !important;
+    border-top: 1px solid #e5dfd4 !important;
+    gap: 28px !important;
+  }
+
+  .sum-num { font-size: 22px !important; }
+  .sum-lbl { font-size: 10px !important; }
+  .sum-bar-fill { print-color-adjust: exact !important; }
+  .day-row:hover { background: transparent !important; }
 }
+
+/* ─── PDF INSTRUCTIONS POPUP ─── */
+.pdf-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 300;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.pdf-overlay.open { display: flex; }
+
+.pdf-box {
+  background: var(--paper);
+  border-radius: 16px;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.3);
+  width: 380px;
+  overflow: hidden;
+  animation: popIn 0.25s cubic-bezier(.34,1.4,.64,1) both;
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.88); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.pdf-box-head {
+  background: var(--ink);
+  padding: 20px 24px 16px;
+}
+
+.pdf-box-head h3 {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.pdf-box-head p {
+  color: rgba(255,255,255,0.5);
+  font-size: 12px;
+}
+
+.pdf-steps {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pdf-step {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.step-num {
+  width: 24px; height: 24px;
+  background: var(--gold);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.step-txt {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.step-txt strong { color: var(--gold); }
+.step-txt code {
+  background: var(--paper2);
+  border: 1px solid var(--rule);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: monospace;
+  color: var(--ink2);
+}
+
+.pdf-box-footer {
+  display: flex;
+  gap: 10px;
+  padding: 0 24px 20px;
+}
+
+.pdf-cancel {
+  flex: 1;
+  background: var(--paper2);
+  border: 1px solid var(--rule);
+  color: var(--ink2);
+  padding: 10px;
+  border-radius: 8px;
+  font-family: 'Sarabun', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.pdf-cancel:hover { background: var(--rule); }
+
+.pdf-confirm {
+  flex: 2;
+  background: #c0392b;
+  border: none;
+  color: #fff;
+  padding: 10px;
+  border-radius: 8px;
+  font-family: 'Sarabun', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.pdf-confirm:hover { background: #a93226; }
 
 @media (max-width: 640px) {
   .toolbar { padding: 0 16px; }
@@ -706,6 +886,34 @@ body {
       </div>
     </div>
 
+  </div>
+</div>
+
+<!-- PDF INSTRUCTIONS POPUP -->
+<div class="pdf-overlay" id="pdfInstructions">
+  <div class="pdf-box">
+    <div class="pdf-box-head">
+      <h3>📄 ส่งออกเป็น PDF</h3>
+      <p>ทำตามขั้นตอนด้านล่างเพื่อบันทึกเป็นไฟล์ PDF</p>
+    </div>
+    <div class="pdf-steps">
+      <div class="pdf-step">
+        <div class="step-num">1</div>
+        <div class="step-txt">กดปุ่ม <strong>"เปิดหน้าพิมพ์"</strong> ด้านล่าง เพื่อเปิด Print Dialog</div>
+      </div>
+      <div class="pdf-step">
+        <div class="step-num">2</div>
+        <div class="step-txt">ที่ช่อง <strong>Printer / เครื่องพิมพ์</strong> ให้เลือก <code>Save as PDF</code> หรือ <code>Microsoft Print to PDF</code></div>
+      </div>
+      <div class="pdf-step">
+        <div class="step-num">3</div>
+        <div class="step-txt">ตั้งค่ากระดาษเป็น <strong>A4</strong> แนวตั้ง แล้วกด <strong>Save / บันทึก</strong></div>
+      </div>
+    </div>
+    <div class="pdf-box-footer">
+      <button class="pdf-cancel" onclick="document.getElementById('pdfInstructions').classList.remove('open')">ยกเลิก</button>
+      <button class="pdf-confirm" onclick="document.getElementById('pdfInstructions').classList.remove('open'); window.print();">🖨 เปิดหน้าพิมพ์</button>
+    </div>
   </div>
 </div>
 
@@ -895,38 +1103,10 @@ function loadData() {
 
 function printReport() { window.print(); }
 
-async function exportPDF() {
-  const btn = document.getElementById('pdfBtn');
-  btn.disabled = true;
-  btn.textContent = '⏳ กำลังสร้าง PDF…';
-
-  // hide interactive elements
-  document.querySelectorAll('.add-area, .task-x, .cal-overlay').forEach(el => el.style.display = 'none');
-
-  const el = document.getElementById('docMain');
-  const fri = addDays(monday, 4);
-  const fname = `รายงานงาน_${fmtTH(monday).replace(/ /g,'_')}-${fmtTH(fri).replace(/ /g,'_')}.pdf`;
-
-  const opt = {
-    margin:       [10, 10, 10, 10],
-    filename:     fname,
-    image:        { type: 'jpeg', quality: 0.97 },
-    html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
-    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-    pagebreak:    { mode: ['avoid-all', 'css'] },
-  };
-
-  try {
-    await html2pdf().set(opt).from(el).save();
-    toast('✅ บันทึก PDF เรียบร้อยแล้ว');
-  } catch(e) {
-    toast('⚠️ ไม่สามารถสร้าง PDF ได้');
-  }
-
-  // restore
-  document.querySelectorAll('.add-area').forEach(el => el.style.display = '');
-  btn.disabled = false;
-  btn.innerHTML = '📄&thinsp;ส่งออก PDF';
+function exportPDF() {
+  // Show instructions overlay briefly then print
+  const overlay = document.getElementById('pdfInstructions');
+  overlay.classList.add('open');
 }
 
 function toast(msg) {
