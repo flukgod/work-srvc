@@ -333,19 +333,20 @@ body {
 }
 
 .doc-title {
-  font-size: 10px;
+  font-size: 15px;
   font-weight: 700;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: var(--ink3);
-  margin-bottom: 6px;
+  letter-spacing: 2px;
+  color: var(--ink2);
+  margin-bottom: 8px;
+  text-align: center;
 }
 
 .doc-heading {
-  font-size: 26px;
+  font-size: 32px;
   font-weight: 800;
   color: var(--ink);
   line-height: 1.2;
+  text-align: center;
 }
 
 .doc-heading em {
@@ -833,7 +834,7 @@ body {
       <button class="wbtn" onclick="changeWeek(1)" title="สัปดาห์ถัดไป">›</button>
     </div>
     <button class="tbtn tbtn-ghost" onclick="printReport()">🖨&thinsp;พิมพ์</button>
-    <button class="tbtn tbtn-pdf" onclick="exportPDF()" id="pdfBtn">📄&thinsp;ส่งออก PDF</button>
+    <button class="tbtn tbtn-pdf" onclick="exportPDF()" id="pdfBtn" title="เลือก 'Save as PDF' ในหน้าพิมพ์">📄&thinsp;ส่งออก PDF</button>
     <button class="tbtn tbtn-gold" onclick="saveData()">บันทึก</button>
   </div>
 </div>
@@ -843,10 +844,10 @@ body {
   <div class="doc" id="docMain">
 
     <!-- HEADER -->
-    <div class="doc-header">
+    <div class="doc-header" style="text-align:center;">
       <div class="doc-title">รายงานผลการปฏิบัติงานประจำสัปดาห์</div>
       <div class="doc-heading">สรุปงาน<em>รายวัน</em></div>
-      <div class="doc-meta">
+      <div class="doc-meta" style="text-align:left;">
         <div class="meta-field">
           <div class="meta-label">ชื่อ-สกุล</div>
           <input class="meta-input" id="fName" placeholder="กรอกชื่อ-สกุล" style="min-width:200px;">
@@ -886,34 +887,6 @@ body {
       </div>
     </div>
 
-  </div>
-</div>
-
-<!-- PDF INSTRUCTIONS POPUP -->
-<div class="pdf-overlay" id="pdfInstructions">
-  <div class="pdf-box">
-    <div class="pdf-box-head">
-      <h3>📄 ส่งออกเป็น PDF</h3>
-      <p>ทำตามขั้นตอนด้านล่างเพื่อบันทึกเป็นไฟล์ PDF</p>
-    </div>
-    <div class="pdf-steps">
-      <div class="pdf-step">
-        <div class="step-num">1</div>
-        <div class="step-txt">กดปุ่ม <strong>"เปิดหน้าพิมพ์"</strong> ด้านล่าง เพื่อเปิด Print Dialog</div>
-      </div>
-      <div class="pdf-step">
-        <div class="step-num">2</div>
-        <div class="step-txt">ที่ช่อง <strong>Printer / เครื่องพิมพ์</strong> ให้เลือก <code>Save as PDF</code> หรือ <code>Microsoft Print to PDF</code></div>
-      </div>
-      <div class="pdf-step">
-        <div class="step-num">3</div>
-        <div class="step-txt">ตั้งค่ากระดาษเป็น <strong>A4</strong> แนวตั้ง แล้วกด <strong>Save / บันทึก</strong></div>
-      </div>
-    </div>
-    <div class="pdf-box-footer">
-      <button class="pdf-cancel" onclick="document.getElementById('pdfInstructions').classList.remove('open')">ยกเลิก</button>
-      <button class="pdf-confirm" onclick="document.getElementById('pdfInstructions').classList.remove('open'); window.print();">🖨 เปิดหน้าพิมพ์</button>
-    </div>
   </div>
 </div>
 
@@ -1104,9 +1077,7 @@ function loadData() {
 function printReport() { window.print(); }
 
 function exportPDF() {
-  // Show instructions overlay briefly then print
-  const overlay = document.getElementById('pdfInstructions');
-  overlay.classList.add('open');
+  window.print();
 }
 
 function toast(msg) {
