@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>รายงานผลการปฏิบัติงาน</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Tiro+Devanagari+Sanskrit&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --paper: #fdfaf4;
+  --paper2: #f7f3ea;
+  --ink: #1e1c18;
+  --ink2: #5a5650;
+  --ink3: #a09a92;
+  --rule: #e5dfd4;
+  --gold: #b8903a;
+  --gold2: #e8c870;
+  --mon: #3d6fa8;
+  --tue: #b85c3a;
+  --wed: #4a8c5c;
+  --thu: #7a5ca8;
+  --fri: #b8903a;
+}
+
+body {
+  font-family: 'Sarabun', sans-serif;
+  background: #ede9e0;
+  min-height: 100vh;
+  padding: 0;
+}
+
+/* ─── TOOLBAR ─── */
+.toolbar {
+  background: var(--ink);
+  padding: 0 32px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.toolbar-brand {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.brand-th {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.2px;
+}
+
+.brand-en {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--gold2);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.week-nav {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.wbtn {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.7);
+  font-size: 16px;
+  cursor: pointer;
+  width: 36px; height: 38px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.18s, color 0.18s;
+}
+
+.wbtn:hover { background: rgba(255,255,255,0.1); color: var(--gold2); }
+
+.week-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #fff;
+  padding: 0 14px;
+  white-space: nowrap;
+  border-left: 1px solid rgba(255,255,255,0.1);
+  border-right: 1px solid rgba(255,255,255,0.1);
+  min-width: 220px;
+  text-align: center;
+  line-height: 38px;
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.18s;
+}
+
+.week-label:hover { background: rgba(255,255,255,0.08); }
+.week-label .cal-icon { font-size: 13px; opacity: 0.6; }
+
+/* ─── CALENDAR PICKER ─── */
+.cal-overlay {
+  position: fixed; inset: 0;
+  z-index: 100;
+  display: none;
+}
+.cal-overlay.open { display: block; }
+
+.cal-popup {
+  position: fixed;
+  top: 66px;
+  left: 50%;
+  transform: translateX(-50%) scale(0.95);
+  background: var(--paper);
+  border-radius: 12px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.22), 0 1px 0 rgba(0,0,0,0.06);
+  width: 320px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.22s cubic-bezier(.34,1.4,.64,1), opacity 0.18s ease;
+  z-index: 101;
+}
+
+.cal-overlay.open .cal-popup {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+  pointer-events: auto;
+}
+
+.cal-head {
+  background: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+}
+
+.cal-month-label {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.3px;
+}
+
+.cal-nav {
+  background: none; border: none;
+  color: rgba(255,255,255,0.7);
+  font-size: 18px;
+  cursor: pointer;
+  width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
+}
+.cal-nav:hover { background: rgba(255,255,255,0.12); color: var(--gold2); }
+
+.cal-dow-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding: 10px 12px 4px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.cal-dow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-align: center;
+  color: var(--ink3);
+  padding: 4px 0;
+}
+
+.cal-dow.mon { color: var(--gold); }
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding: 8px 12px 14px;
+  gap: 2px;
+}
+
+.cal-cell {
+  aspect-ratio: 1;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink2);
+  border-radius: 6px;
+  cursor: default;
+}
+
+.cal-cell.empty { opacity: 0; pointer-events: none; }
+.cal-cell.other-month { color: var(--ink3); opacity: 0.4; }
+
+/* Monday — clickable */
+.cal-cell.is-mon {
+  font-weight: 700;
+  color: var(--ink);
+  cursor: pointer;
+  position: relative;
+}
+
+.cal-cell.is-mon::before {
+  content: '';
+  position: absolute; inset: 1px;
+  border-radius: 6px;
+  border: 1.5px solid var(--rule);
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.cal-cell.is-mon:hover::before {
+  border-color: var(--gold);
+  background: rgba(184,144,58,0.07);
+}
+
+/* selected week highlight */
+.cal-cell.in-week {
+  background: rgba(184,144,58,0.10);
+  color: var(--ink);
+  font-weight: 600;
+  border-radius: 0;
+}
+.cal-cell.week-start { border-radius: 6px 0 0 6px; }
+.cal-cell.week-end   { border-radius: 0 6px 6px 0; }
+
+.cal-cell.is-mon.selected-mon::before {
+  background: var(--gold);
+  border-color: var(--gold);
+}
+.cal-cell.is-mon.selected-mon { color: #fff; z-index: 1; }
+
+.cal-cell.today-cell {
+  font-weight: 800;
+  color: var(--gold);
+}
+
+.cal-hint {
+  padding: 10px 14px;
+  font-size: 11px;
+  color: var(--ink3);
+  text-align: center;
+  border-top: 1px solid var(--rule);
+  background: var(--paper2);
+}
+.cal-hint strong { color: var(--gold); }
+
+.tbtn {
+  height: 38px;
+  padding: 0 18px;
+  border-radius: 8px;
+  font-family: 'Sarabun', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  display: flex; align-items: center; gap: 6px;
+  transition: all 0.18s;
+}
+
+.tbtn-ghost {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.8);
+}
+
+.tbtn-ghost:hover { background: rgba(255,255,255,0.14); color: #fff; }
+
+.tbtn-gold {
+  background: var(--gold);
+  color: #fff;
+}
+
+.tbtn-gold:hover { background: #c8a040; }
+
+.tbtn-pdf {
+  background: #c0392b;
+  color: #fff;
+}
+.tbtn-pdf:hover { background: #a93226; }
+.tbtn-pdf:disabled { background: #888; cursor: not-allowed; opacity: 0.7; }
+
+/* ─── DOCUMENT ─── */
+.doc-wrap {
+  max-width: 860px;
+  margin: 32px auto 48px;
+  padding: 0 20px;
+}
+
+.doc {
+  background: var(--paper);
+  border-radius: 4px;
+  box-shadow:
+    0 1px 0 rgba(0,0,0,0.04),
+    0 4px 20px rgba(0,0,0,0.10),
+    0 20px 60px rgba(0,0,0,0.07);
+  overflow: hidden;
+}
+
+/* ─── DOC HEADER ─── */
+.doc-header {
+  padding: 40px 48px 28px;
+  border-bottom: 2px solid var(--ink);
+  position: relative;
+}
+
+.doc-header::after {
+  content: '';
+  position: absolute;
+  bottom: -5px; left: 48px; right: 48px;
+  height: 1px;
+  background: var(--rule);
+}
+
+.doc-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 6px;
+}
+
+.doc-heading {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.doc-heading em {
+  font-style: normal;
+  color: var(--gold);
+}
+
+.doc-meta {
+  display: flex;
+  gap: 32px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.meta-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.meta-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--ink3);
+}
+
+.meta-input {
+  font-family: 'Sarabun', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+  border: none;
+  border-bottom: 1.5px solid var(--rule);
+  background: transparent;
+  outline: none;
+  padding: 3px 0;
+  min-width: 160px;
+  transition: border-color 0.2s;
+}
+
+.meta-input::placeholder { color: var(--ink3); font-weight: 400; }
+.meta-input:focus { border-color: var(--gold); }
+
+/* ─── DAY ROWS ─── */
+.days-section {
+  padding: 0 48px 8px;
+}
+
+.day-row {
+  border-bottom: 1px solid var(--rule);
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  min-height: 90px;
+  transition: background 0.15s;
+}
+
+.day-row:last-child { border-bottom: none; }
+.day-row:hover { background: rgba(184,144,58,0.03); }
+
+.day-label {
+  padding: 20px 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  border-right: 1px solid var(--rule);
+  padding-right: 24px;
+  justify-content: flex-start;
+}
+
+.day-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.day-date-sub {
+  font-size: 12px;
+  color: var(--ink3);
+  font-weight: 400;
+}
+
+.day-indicator {
+  width: 3px;
+  height: 20px;
+  border-radius: 2px;
+  margin-bottom: 6px;
+}
+
+.ind-mon { background: var(--mon); }
+.ind-tue { background: var(--tue); }
+.ind-wed { background: var(--wed); }
+.ind-thu { background: var(--thu); }
+.ind-fri { background: var(--fri); }
+
+.day-tasks {
+  padding: 16px 0 16px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* ─── TASK ITEMS ─── */
+.task-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+  border-radius: 4px;
+  animation: fadin 0.2s ease both;
+  position: relative;
+}
+
+@keyframes fadin { from { opacity: 0; transform: translateX(-4px); } to { opacity: 1; transform: translateX(0); } }
+
+.task-bullet {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--ink3);
+  transition: background 0.2s;
+}
+
+.task-line.done .task-bullet { background: #6b8f71; }
+
+.task-txt {
+  flex: 1;
+  font-size: 14.5px;
+  color: var(--ink);
+  line-height: 1.5;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.task-line.done .task-txt {
+  text-decoration: line-through;
+  color: var(--ink3);
+}
+
+.task-x {
+  opacity: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--ink3);
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  transition: opacity 0.15s, color 0.15s, background 0.15s;
+}
+
+.task-line:hover .task-x { opacity: 1; }
+.task-x:hover { color: #c0392b; background: rgba(192,57,43,0.08); }
+
+/* ─── ADD AREA ─── */
+.add-area {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.day-tasks:focus-within .add-area,
+.day-tasks:hover .add-area { opacity: 1; }
+
+.add-area-input {
+  flex: 1;
+  font-family: 'Sarabun', sans-serif;
+  font-size: 14px;
+  color: var(--ink);
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px dashed var(--rule);
+  outline: none;
+  padding: 4px 0;
+  transition: border-color 0.2s;
+}
+
+.add-area-input::placeholder { color: var(--ink3); font-size: 13px; }
+.add-area-input:focus { border-color: var(--gold); }
+
+.add-plus {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--rule);
+}
+
+/* ─── SUMMARY ─── */
+.doc-summary {
+  background: var(--paper2);
+  border-top: 1px solid var(--rule);
+  padding: 24px 48px;
+  display: flex;
+  gap: 40px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.sum-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.sum-num {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--ink);
+  line-height: 1;
+}
+
+.sum-lbl {
+  font-size: 11px;
+  color: var(--ink3);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.sum-divider {
+  width: 1px; height: 40px;
+  background: var(--rule);
+}
+
+.sum-bar-wrap { flex: 1; min-width: 120px; }
+.sum-bar-label {
+  font-size: 11px; color: var(--ink3);
+  margin-bottom: 6px; font-weight: 500;
+}
+
+.sum-bar-track {
+  height: 6px;
+  background: var(--rule);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.sum-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold), var(--gold2));
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+/* ─── TOAST ─── */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: var(--ink); color: #fff;
+  padding: 10px 22px; border-radius: 8px;
+  font-size: 13px; font-weight: 500;
+  border-bottom: 2px solid var(--gold);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  opacity: 0;
+  transition: all 0.28s cubic-bezier(.34,1.56,.64,1);
+  z-index: 200; white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ─── PRINT ─── */
+@media print {
+  body { background: #fff; }
+  .toolbar { display: none; }
+  .doc-wrap { margin: 0; padding: 0; max-width: 100%; }
+  .doc { box-shadow: none; border-radius: 0; }
+  .add-area { display: none; }
+  .task-x { display: none; }
+  .day-row:hover { background: transparent; }
+  .doc-header { padding: 32px 40px 24px; }
+  .days-section { padding: 0 40px; }
+  .doc-summary { padding: 20px 40px; }
+}
+
+@media (max-width: 640px) {
+  .toolbar { padding: 0 16px; }
+  .week-label { min-width: 150px; font-size: 11.5px; padding: 0 10px; }
+  .doc-wrap { padding: 0; margin: 16px auto 32px; }
+  .doc-header { padding: 28px 24px 20px; }
+  .days-section { padding: 0 24px; }
+  .day-row { grid-template-columns: 100px 1fr; }
+  .day-tasks { padding-left: 18px; }
+  .doc-summary { padding: 20px 24px; gap: 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <div class="toolbar-brand">
+    <span class="brand-th">รายงานผลการปฏิบัติงาน</span>
+    <span class="brand-en">Weekly Report</span>
+  </div>
+  <div class="toolbar-right">
+    <div class="week-nav">
+      <button class="wbtn" onclick="changeWeek(-1)" title="สัปดาห์ก่อนหน้า">‹</button>
+      <div class="week-label" id="weekLabel" onclick="openCalendar()" title="เลือกสัปดาห์">
+        <span class="cal-icon">📅</span>
+        <span id="weekLabelText">—</span>
+      </div>
+      <button class="wbtn" onclick="changeWeek(1)" title="สัปดาห์ถัดไป">›</button>
+    </div>
+    <button class="tbtn tbtn-ghost" onclick="printReport()">🖨&thinsp;พิมพ์</button>
+    <button class="tbtn tbtn-pdf" onclick="exportPDF()" id="pdfBtn">📄&thinsp;ส่งออก PDF</button>
+    <button class="tbtn tbtn-gold" onclick="saveData()">บันทึก</button>
+  </div>
+</div>
+
+<!-- DOCUMENT -->
+<div class="doc-wrap">
+  <div class="doc" id="docMain">
+
+    <!-- HEADER -->
+    <div class="doc-header">
+      <div class="doc-title">รายงานผลการปฏิบัติงานประจำสัปดาห์</div>
+      <div class="doc-heading">สรุปงาน<em>รายวัน</em></div>
+      <div class="doc-meta">
+        <div class="meta-field">
+          <div class="meta-label">ชื่อ-สกุล</div>
+          <input class="meta-input" id="fName" placeholder="กรอกชื่อ-สกุล" style="min-width:200px;">
+        </div>
+        <div class="meta-field">
+          <div class="meta-label">ตำแหน่ง / แผนก</div>
+          <input class="meta-input" id="fPos" placeholder="ตำแหน่งงาน">
+        </div>
+        <div class="meta-field">
+          <div class="meta-label">สัปดาห์ที่</div>
+          <input class="meta-input" id="fWeek" placeholder="—" readonly style="min-width:200px;color:var(--ink2);">
+        </div>
+      </div>
+    </div>
+
+    <!-- DAY ROWS -->
+    <div class="days-section" id="daysSection"></div>
+
+    <!-- SUMMARY -->
+    <div class="doc-summary">
+      <div class="sum-item">
+        <div class="sum-num" id="sumTotal">0</div>
+        <div class="sum-lbl">งานทั้งหมด</div>
+      </div>
+      <div class="sum-divider"></div>
+      <div class="sum-item">
+        <div class="sum-num" id="sumDone">0</div>
+        <div class="sum-lbl">เสร็จแล้ว</div>
+      </div>
+      <div class="sum-divider"></div>
+      <div class="sum-bar-wrap">
+        <div class="sum-bar-label">ความคืบหน้าโดยรวม</div>
+        <div class="sum-bar-track">
+          <div class="sum-bar-fill" id="sumBar" style="width:0%"></div>
+        </div>
+        <div style="font-size:11px;color:var(--ink3);margin-top:5px;" id="sumPct">0%</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- CALENDAR OVERLAY -->
+<div class="cal-overlay" id="calOverlay" onclick="closeCalendar(event)">
+  <div class="cal-popup" id="calPopup">
+    <div class="cal-head">
+      <button class="cal-nav" onclick="calNav(-1)">‹</button>
+      <div class="cal-month-label" id="calMonthLabel"></div>
+      <button class="cal-nav" onclick="calNav(1)">›</button>
+    </div>
+    <div class="cal-dow-row">
+      <div class="cal-dow mon">จ.</div>
+      <div class="cal-dow">อ.</div>
+      <div class="cal-dow">พ.</div>
+      <div class="cal-dow">พฤ.</div>
+      <div class="cal-dow">ศ.</div>
+      <div class="cal-dow">ส.</div>
+      <div class="cal-dow">อา.</div>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div class="cal-hint">กดที่ <strong>วันจันทร์</strong> เพื่อเลือกสัปดาห์</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const DAYS = [
+  { key:'mon', name:'วันจันทร์',   color:'var(--mon)', ind:'ind-mon' },
+  { key:'tue', name:'วันอังคาร',   color:'var(--tue)', ind:'ind-tue' },
+  { key:'wed', name:'วันพุธ',      color:'var(--wed)', ind:'ind-wed' },
+  { key:'thu', name:'วันพฤหัสบดี', color:'var(--thu)', ind:'ind-thu' },
+  { key:'fri', name:'วันศุกร์',    color:'var(--fri)', ind:'ind-fri' },
+];
+
+const M = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+
+let monday = getMonday(new Date());
+let db = {}; // weekKey -> { mon:[{text,done}], ... }
+
+function getMonday(d) {
+  const c = new Date(d); c.setHours(0,0,0,0);
+  const day = c.getDay();
+  c.setDate(c.getDate() - (day===0 ? 6 : day-1));
+  return c;
+}
+
+function addDays(d, n) {
+  const c = new Date(d); c.setDate(c.getDate()+n); return c;
+}
+
+function fmtTH(d) { return `${d.getDate()} ${M[d.getMonth()]} ${d.getFullYear()+543}`; }
+function wkey() { return monday.toISOString().slice(0,10); }
+
+function weekData() {
+  if (!db[wkey()]) {
+    db[wkey()] = {};
+    DAYS.forEach(d => db[wkey()][d.key] = []);
+  }
+  return db[wkey()];
+}
+
+function changeWeek(n) {
+  monday = addDays(monday, n*7);
+  render();
+}
+
+function render() {
+  const fri = addDays(monday, 4);
+  const label = `${fmtTH(monday)} – ${fmtTH(fri)}`;
+  document.getElementById('weekLabelText').textContent = label;
+  document.getElementById('fWeek').value = label;
+
+  const wd = weekData();
+  const sec = document.getElementById('daysSection');
+  sec.innerHTML = '';
+
+  DAYS.forEach((day, idx) => {
+    const date = addDays(monday, idx);
+    const tasks = wd[day.key] || [];
+
+    const row = document.createElement('div');
+    row.className = 'day-row';
+
+    const tasksHtml = tasks.map((t,i) => `
+      <div class="task-line${t.done?' done':''}" id="tl-${day.key}-${i}">
+        <div class="task-bullet"></div>
+        <div class="task-txt" onclick="toggleDone('${day.key}',${i})" title="คลิกเพื่อทำเครื่องหมายเสร็จ">${escHtml(t.text)}</div>
+        <button class="task-x" onclick="delTask('${day.key}',${i})" title="ลบ">✕</button>
+      </div>
+    `).join('');
+
+    row.innerHTML = `
+      <div class="day-label">
+        <div class="day-indicator ${day.ind}"></div>
+        <div class="day-name">${day.name}</div>
+        <div class="day-date-sub">${fmtTH(date)}</div>
+      </div>
+      <div class="day-tasks" id="tasks-${day.key}">
+        ${tasksHtml}
+        <div class="add-area">
+          <div class="add-plus"></div>
+          <input class="add-area-input" id="inp-${day.key}" placeholder="พิมพ์งาน แล้วกด Enter…"
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();addTask('${day.key}');}">
+        </div>
+      </div>
+    `;
+    sec.appendChild(row);
+  });
+
+  updateSummary();
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function addTask(dayKey) {
+  const inp = document.getElementById('inp-'+dayKey);
+  const text = inp.value.trim();
+  if (!text) return;
+  weekData()[dayKey].push({text, done:false});
+  inp.value = '';
+  render();
+  // keep focus in same day
+  setTimeout(() => {
+    const el = document.getElementById('inp-'+dayKey);
+    if (el) el.focus();
+  }, 30);
+}
+
+function delTask(dayKey, idx) {
+  weekData()[dayKey].splice(idx,1);
+  render();
+}
+
+function toggleDone(dayKey, idx) {
+  const t = weekData()[dayKey][idx];
+  t.done = !t.done;
+  // update classes without full re-render for smoothness
+  const line = document.getElementById(`tl-${dayKey}-${idx}`);
+  if (line) {
+    line.classList.toggle('done', t.done);
+  }
+  updateSummary();
+}
+
+function updateSummary() {
+  const wd = weekData();
+  let total = 0, done = 0;
+  DAYS.forEach(d => {
+    (wd[d.key]||[]).forEach(t => { total++; if(t.done) done++; });
+  });
+  document.getElementById('sumTotal').textContent = total;
+  document.getElementById('sumDone').textContent = done;
+  const pct = total ? Math.round(done/total*100) : 0;
+  document.getElementById('sumBar').style.width = pct+'%';
+  document.getElementById('sumPct').textContent = pct+'%';
+}
+
+function saveData() {
+  try {
+    // save profile too
+    db[wkey()]._profile = {
+      name: document.getElementById('fName').value,
+      pos:  document.getElementById('fPos').value,
+    };
+    sessionStorage.setItem('wpr3', JSON.stringify(db));
+    toast('✅ บันทึกเรียบร้อยแล้ว');
+  } catch(e) { toast('⚠️ บันทึกไม่สำเร็จ'); }
+}
+
+function loadData() {
+  try {
+    const raw = sessionStorage.getItem('wpr3');
+    if (raw) {
+      db = JSON.parse(raw);
+      const p = db[wkey()]?._profile;
+      if (p) {
+        document.getElementById('fName').value = p.name||'';
+        document.getElementById('fPos').value  = p.pos||'';
+      }
+    }
+  } catch(e) {}
+}
+
+function printReport() { window.print(); }
+
+async function exportPDF() {
+  const btn = document.getElementById('pdfBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ กำลังสร้าง PDF…';
+
+  // hide interactive elements
+  document.querySelectorAll('.add-area, .task-x, .cal-overlay').forEach(el => el.style.display = 'none');
+
+  const el = document.getElementById('docMain');
+  const fri = addDays(monday, 4);
+  const fname = `รายงานงาน_${fmtTH(monday).replace(/ /g,'_')}-${fmtTH(fri).replace(/ /g,'_')}.pdf`;
+
+  const opt = {
+    margin:       [10, 10, 10, 10],
+    filename:     fname,
+    image:        { type: 'jpeg', quality: 0.97 },
+    html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    pagebreak:    { mode: ['avoid-all', 'css'] },
+  };
+
+  try {
+    await html2pdf().set(opt).from(el).save();
+    toast('✅ บันทึก PDF เรียบร้อยแล้ว');
+  } catch(e) {
+    toast('⚠️ ไม่สามารถสร้าง PDF ได้');
+  }
+
+  // restore
+  document.querySelectorAll('.add-area').forEach(el => el.style.display = '');
+  btn.disabled = false;
+  btn.innerHTML = '📄&thinsp;ส่งออก PDF';
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2400);
+}
+
+// ─── CALENDAR PICKER ───
+let calViewYear, calViewMonth;
+
+function openCalendar() {
+  calViewYear  = monday.getFullYear();
+  calViewMonth = monday.getMonth();
+  renderCal();
+  document.getElementById('calOverlay').classList.add('open');
+}
+
+function closeCalendar(e) {
+  if (!e || e.target === document.getElementById('calOverlay')) {
+    document.getElementById('calOverlay').classList.remove('open');
+  }
+}
+
+function calNav(n) {
+  calViewMonth += n;
+  if (calViewMonth > 11) { calViewMonth = 0; calViewYear++; }
+  if (calViewMonth < 0)  { calViewMonth = 11; calViewYear--; }
+  renderCal();
+}
+
+function renderCal() {
+  const MF = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+  document.getElementById('calMonthLabel').textContent =
+    `${MF[calViewMonth]} ${calViewYear + 543}`;
+
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+
+  // first day of month (0=Sun)
+  const firstDay = new Date(calViewYear, calViewMonth, 1).getDay();
+  // offset to Monday-start grid: Mon=0 … Sun=6
+  const offset = (firstDay === 0) ? 6 : firstDay - 1;
+  const daysInMonth = new Date(calViewYear, calViewMonth + 1, 0).getDate();
+
+  const selMon  = monday.toISOString().slice(0,10);
+  const today   = new Date(); today.setHours(0,0,0,0);
+  const selFri  = addDays(monday, 4);
+
+  // blanks
+  for (let b = 0; b < offset; b++) {
+    const cell = document.createElement('div');
+    cell.className = 'cal-cell empty';
+    grid.appendChild(cell);
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const date = new Date(calViewYear, calViewMonth, d);
+    const dow  = date.getDay(); // 0=Sun,1=Mon…
+    const isMon = dow === 1;
+    const cell = document.createElement('div');
+
+    // week highlight
+    const isInWeek = date >= monday && date <= selFri;
+    const isWeekStart = date.toDateString() === monday.toDateString();
+    const isWeekEnd   = date.toDateString() === selFri.toDateString();
+    const isToday     = date.toDateString() === today.toDateString();
+    const isSelectedMon = isMon && date.toISOString().slice(0,10) === selMon;
+
+    let cls = 'cal-cell';
+    if (isInWeek)    cls += ' in-week';
+    if (isWeekStart) cls += ' week-start';
+    if (isWeekEnd)   cls += ' week-end';
+    if (isMon)       cls += ' is-mon';
+    if (isToday)     cls += ' today-cell';
+    if (isSelectedMon) cls += ' selected-mon';
+
+    cell.className = cls;
+    cell.textContent = d;
+
+    if (isMon) {
+      cell.onclick = () => {
+        monday = new Date(calViewYear, calViewMonth, d);
+        closeCalendar();
+        render();
+      };
+    }
+
+    grid.appendChild(cell);
+  }
+}
+
+// INIT
+loadData();
+render();
+</script>
+</body>
+</html>
